@@ -36,10 +36,6 @@ class Evaluator:
                 self.FP_total += FP
                 self.TN_total += TN
                 self.FN_total += FN
-        self.TP_total /= len(self.val_loader.dataset)
-        self.FP_total /= len(self.val_loader.dataset)
-        self.TN_total /= len(self.val_loader.dataset)
-        self.FN_total /= len(self.val_loader.dataset)
         self.precision = self.calculate_precision()
         self.recall = self.calculate_recall()
         self.f1 = self.calculate_f1()
