@@ -10,7 +10,7 @@ All data is provided as part of the LandSlide4Sense 2022 competition [1].
 
 ![data](https://github.com/user-attachments/assets/09c5daba-cd62-4dbf-af1f-895445c60e9d)
 
-The data class creates the 6-channel images and mask images from the .h5 files provided by the competition organisers. Each channel is min-max normalised. The data is split into training and validation datasets and a DataLoader for each is provided as attributes of the class.
+The data class creates the 6-channel images and mask images from the .h5 files provided by the competition organisers. Each channel is min-max normalised. The data is split into training and validation datasets and a PyTorch DataLoader for each is provided as attributes of the class.
 
 ## unet.py
 The U-Net model has a similar implementation to that of the original paper [2], with the exception that here the 3x3 convolutions are padded. This adjustment helps to control the size reduction of the feature maps in the contracting path of the U-Net, which is necessary considering the small size of the input images (128x128) compared to the original U-Net implementation (572x572).
