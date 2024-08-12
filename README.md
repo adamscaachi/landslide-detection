@@ -1,4 +1,4 @@
-# landslide-detection
+# Landslide Segmentation
 
 The occurence of landslide events is expected to increase as a result of climate change. Our ability to predict areas prone to future landslide events relies on us having a dataset detailing the locations of past occurences. To address this, machine learning models can be trained to segment satellite imagery into landslide and non-landslide categories.
 
