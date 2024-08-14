@@ -46,7 +46,15 @@ class Data:
         return (data - min) / (max - min + 1e-14)
 
     def split_data(self):
-        self.train_images, self.val_images, self.train_masks, self.val_masks = train_test_split(self.images, self.masks, test_size=0.2, random_state=42)
+        self.train_images, temp_images, self.train_masks, temp_masks = train_test_split(self.images, self.masks, test_size=128, random_state=42)
+        self.val_images, self.test_images, self.val_masks, self.test_masks = train_test_split(temp_images, temp_masks, test_size=64, random_state=42)
+        self.cleanup(temp_images, temp_masks)
+
+    def cleanup(self, temp_images, temp_masks):
+        del self.images
+        del self.masks
+        del temp_images
+        del temp_masks
 
     def create_loader(self, images, masks):
         images_tensor = torch.tensor(images, dtype=torch.float32)
