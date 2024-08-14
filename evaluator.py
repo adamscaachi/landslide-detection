@@ -26,7 +26,7 @@ class Evaluator:
                f"Precision = {self.precision:.2f}\n"
                f"Recall = {self.recall:.2f}\n"
                f"F1 Score = {self.f1:.2f}\n"
-               f"IOU = {self.iou:.2f}")
+               f"IoU = {self.iou:.2f}")
 
     def initialise_confusion_matrix(self):
         self.TP_total = 0
