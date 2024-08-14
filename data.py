@@ -15,8 +15,8 @@ class Data:
         self.test_loader = self.create_loader(self.test_images, self.test_masks)
 
     def read_and_process_data(self):
-        image_paths = glob.glob('data/train/img/*.h5')
-        mask_paths = glob.glob('data/train/mask/*.h5')    
+        image_paths = glob.glob('data/img/*.h5')
+        mask_paths = glob.glob('data/mask/*.h5')    
         num_samples = len(image_paths)
         self.images = np.zeros((num_samples, 6, 128, 128))
         self.masks = np.zeros((num_samples, 1, 128, 128))
