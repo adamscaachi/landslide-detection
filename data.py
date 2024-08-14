@@ -12,6 +12,7 @@ class Data:
         self.split_data()
         self.train_loader = self.create_loader(self.train_images, self.train_masks)
         self.val_loader = self.create_loader(self.val_images, self.val_masks)
+        self.test_loader = self.create_loader(self.test_images, self.test_masks)
 
     def read_and_process_data(self):
         image_paths = glob.glob('data/train/img/*.h5')

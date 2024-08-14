@@ -23,10 +23,11 @@ def eval_model(file_name, threshold):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     data = Data()
     val_loader = data.val_loader
+    test_loader = data.test_loader
     state_dict = file_name + '.pth'
-    evaluator = Evaluator(model, state_dict, device, val_loader, threshold)
-    evaluator.evaluate()
-    print(evaluator)
+    evaluator = Evaluator(model, state_dict, device, threshold)
+    evaluator.evaluate(val_loader, "Validation")
+    evaluator.evaluate(test_loader, "Testing")
 
 if __name__ == "__main__":
     mode = input("Do you want to train (type 'train') or evaluate (type 'eval') a model? ")
