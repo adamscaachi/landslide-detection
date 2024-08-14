@@ -18,15 +18,14 @@ def train_model(file_name, epochs):
     trainer.train(epochs)
     torch.save(model.state_dict(), file_name + '.pth' )
 
-def eval_model(file_name, threshold):
+def eval_model(file_name):
     model = UNet(in_channels=6, out_channels=1)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     data = Data()
     val_loader = data.val_loader
     test_loader = data.test_loader
     state_dict = file_name + '.pth'
-    evaluator = Evaluator(model, state_dict, device, val_loader, test_loader, threshold)
-    evaluator.evaluate()
+    evaluator = Evaluator(model, state_dict, device, val_loader, test_loader)
 
 if __name__ == "__main__":
     mode = input("Do you want to train (type 'train') or evaluate (type 'eval') a model? ")
@@ -37,5 +36,4 @@ if __name__ == "__main__":
         print("Training of model " + file_name + " complete!")
     elif mode == 'eval':
         file_name = input("Please specify the name of the model to be evaluated: ")
-        threshold = float(input("Please specify the confidence threshold (0 to 1) for classifying an object: "))
-        eval_model(file_name, threshold)
+        eval_model(file_name)

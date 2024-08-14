@@ -3,22 +3,26 @@ import numpy as np
 
 class Evaluator:
 
-    def __init__(self, model, state_dict, device, val_loader, test_loader, threshold):
+    def __init__(self, model, state_dict, device, val_loader, test_loader):
         self.model = model.to(device)
         self.state_dict = state_dict
         self.model.load_state_dict(torch.load(state_dict, weights_only=True))
         self.device = device
         self.val_loader = val_loader
         self.test_loader = test_loader
-        self.threshold = threshold
         self.precision = None
         self.recall = None
         self.f1 = None
         self.iou = None
+        self.optimal_threshold = None
+        self.best_iou = -np.inf
+        self.find_optimal_threshold()
+        self.evaluate(val_loader, "Validation", self.optimal_threshold)
+        self.evaluate(test_loader, "Testing", self.optimal_threshold)
 
-    def print_metrics(self, mode):
+    def print_metrics(self, mode, threshold):
         print (f"\n{mode}\n"
-               f"Model: {self.state_dict}" f" (threshold = {self.threshold})\n"
+               f"Model: {self.state_dict}" f" (threshold = {threshold:.2f})\n"
                f"Precision = {self.precision:.2f}\n"
                f"Recall = {self.recall:.2f}\n"
                f"F1 Score = {self.f1:.2f}\n"
@@ -30,23 +34,22 @@ class Evaluator:
         self.TN_total = 0
         self.FN_total = 0 
 
-    def evaluate(self):
-        for loader, mode in [(self.val_loader, "Validation"), (self.test_loader, "Testing")]:
-            self.initialise_confusion_matrix()
-            for images, masks in loader:
-                images, masks = images.to(self.device), masks.to(self.device)  
-                for image, mask in zip(images, masks):
-                    prediction = self.predict_mask(image.unsqueeze(0), self.threshold)
-                    TP, FP, TN, FN = self.calculate_confusion_matrix(prediction, mask.cpu().numpy())
-                    self.TP_total += TP
-                    self.FP_total += FP
-                    self.TN_total += TN
-                    self.FN_total += FN
-            self.precision = self.calculate_precision()
-            self.recall = self.calculate_recall()
-            self.f1 = self.calculate_f1()
-            self.iou = self.calculate_iou()
-            self.print_metrics(mode)
+    def evaluate(self, loader, mode, threshold):
+        self.initialise_confusion_matrix()
+        for images, masks in loader:
+            images, masks = images.to(self.device), masks.to(self.device)  
+            for image, mask in zip(images, masks):
+                prediction = self.predict_mask(image.unsqueeze(0), threshold)
+                TP, FP, TN, FN = self.calculate_confusion_matrix(prediction, mask.cpu().numpy())
+                self.TP_total += TP
+                self.FP_total += FP
+                self.TN_total += TN
+                self.FN_total += FN
+        self.precision = self.calculate_precision()
+        self.recall = self.calculate_recall()
+        self.f1 = self.calculate_f1()
+        self.iou = self.calculate_iou()
+        self.print_metrics(mode, threshold) if mode else None
 
     def predict_mask(self, image, threshold):
         with torch.no_grad():
@@ -73,3 +76,11 @@ class Evaluator:
 
     def calculate_iou(self):
         return self.TP_total / (self.TP_total + self.FP_total + self.FN_total + 1e-14)
+
+    def find_optimal_threshold(self):
+        thresholds = np.arange(0.05, 1, 0.05)
+        for threshold in thresholds:
+            self.evaluate(self.val_loader, 0, threshold)
+            if self.iou > self.best_iou:
+                self.best_iou = self.iou
+                self.optimal_threshold = threshold
