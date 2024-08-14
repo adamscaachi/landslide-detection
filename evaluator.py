@@ -3,11 +3,13 @@ import numpy as np
 
 class Evaluator:
 
-    def __init__(self, model, state_dict, device, threshold):
+    def __init__(self, model, state_dict, device, val_loader, test_loader, threshold):
         self.model = model.to(device)
         self.state_dict = state_dict
         self.model.load_state_dict(torch.load(state_dict, weights_only=True))
         self.device = device
+        self.val_loader = val_loader
+        self.test_loader = test_loader
         self.threshold = threshold
         self.precision = None
         self.recall = None
@@ -28,22 +30,23 @@ class Evaluator:
         self.TN_total = 0
         self.FN_total = 0 
 
-    def evaluate(self, loader, mode):
-        self.initialise_confusion_matrix()
-        for images, masks in loader:
-            images, masks = images.to(self.device), masks.to(self.device)  
-            for image, mask in zip(images, masks):
-                prediction = self.predict_mask(image.unsqueeze(0), self.threshold)
-                TP, FP, TN, FN = self.calculate_confusion_matrix(prediction, mask.cpu().numpy())
-                self.TP_total += TP
-                self.FP_total += FP
-                self.TN_total += TN
-                self.FN_total += FN
-        self.precision = self.calculate_precision()
-        self.recall = self.calculate_recall()
-        self.f1 = self.calculate_f1()
-        self.iou = self.calculate_iou()
-        self.print_metrics(mode)
+    def evaluate(self):
+        for loader, mode in [(self.val_loader, "Validation"), (self.test_loader, "Testing")]:
+            self.initialise_confusion_matrix()
+            for images, masks in loader:
+                images, masks = images.to(self.device), masks.to(self.device)  
+                for image, mask in zip(images, masks):
+                    prediction = self.predict_mask(image.unsqueeze(0), self.threshold)
+                    TP, FP, TN, FN = self.calculate_confusion_matrix(prediction, mask.cpu().numpy())
+                    self.TP_total += TP
+                    self.FP_total += FP
+                    self.TN_total += TN
+                    self.FN_total += FN
+            self.precision = self.calculate_precision()
+            self.recall = self.calculate_recall()
+            self.f1 = self.calculate_f1()
+            self.iou = self.calculate_iou()
+            self.print_metrics(mode)
 
     def predict_mask(self, image, threshold):
         with torch.no_grad():
