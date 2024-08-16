@@ -6,10 +6,11 @@ from unet import UNet
 from trainer import Trainer
 from evaluator import Evaluator
 
-def train_model(file_name, epochs):	
-    model = UNet(in_channels=6, out_channels=1)
+def train_model(file_name, epochs):
+    bands = ["B4", "B3", "B2", "NDVI", "B13", "B14"]	
+    model = UNet(in_channels=len(bands), out_channels=1)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    data = Data()
+    data = Data(bands)
     criterion = nn.BCEWithLogitsLoss() 
     optimizer = optim.Adam(model.parameters(), lr=1e-4)
     train_loader = data.train_loader
@@ -19,9 +20,10 @@ def train_model(file_name, epochs):
     torch.save(model.state_dict(), file_name + '.pth' )
 
 def eval_model(file_name):
-    model = UNet(in_channels=6, out_channels=1)
+    bands = ["B4", "B3", "B2", "NDVI", "B13", "B14"]	
+    model = UNet(in_channels=len(bands), out_channels=1)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    data = Data()
+    data = Data(bands)
     val_loader = data.val_loader
     test_loader = data.test_loader
     state_dict = file_name + '.pth'

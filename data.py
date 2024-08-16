@@ -7,7 +7,8 @@ from torch.utils.data import TensorDataset, DataLoader
 
 class Data:
 
-    def __init__(self):
+    def __init__(self, bands):
+        self.bands = bands
         self.read_and_process_data()
         self.split_data()
         self.train_loader = self.create_loader(self.train_images, self.train_masks)
@@ -18,7 +19,8 @@ class Data:
         image_paths = glob.glob('data/img/*.h5')
         mask_paths = glob.glob('data/mask/*.h5')    
         num_samples = len(image_paths)
-        self.images = np.zeros((num_samples, 6, 128, 128))
+        num_channels = len(self.bands)
+        self.images = np.zeros((num_samples, num_channels, 128, 128))
         self.masks = np.zeros((num_samples, 1, 128, 128))
         for i, (image_path, mask_path) in enumerate(zip(image_paths, mask_paths)):
             self.process_image(image_path, i)
@@ -27,14 +29,15 @@ class Data:
     def process_image(self, image_path, index):
         with h5py.File(image_path, 'r') as f:
             image = np.array(f['img'])
-            image_red = image[:, :, 3]
-            image_nir = image[:, :, 7]
-            self.images[index, 0, :, :] = self.normalise(image_red)
-            self.images[index, 1, :, :] = self.normalise(image[:, :, 2]) 
-            self.images[index, 2, :, :] = self.normalise(image[:, :, 1]) 
-            self.images[index, 3, :, :] = self.normalise((image_nir - image_red) / (image_nir + image_red + 1e-14))
-            self.images[index, 4, :, :] = self.normalise(image[:, :, 12]) 
-            self.images[index, 5, :, :] = self.normalise(image[:, :, 13])
+            for i, band in enumerate(self.bands):
+                if band.startswith("B") and band[1:].isdigit() and 1 <= int(band[1:]) <= 14:
+                    self.images[index, i, :, :] = self.normalise(image[:, :, int(band[1:]) - 1])
+                elif band == "NDVI":
+                    self.images[index, i, :, :] = self.normalise((image[:, :, 7] - image[:, :, 3]) / (image[:, :, 7] + image[:, :, 3] + 1e-14))
+                elif band == "NDWI":
+                    self.images[index, i, :, :] = self.normalise((image[:, :, 2] - image[:, :, 7]) / (image[:, :, 2] + image[:, :, 7] + 1e-14))
+                else:
+                    raise ValueError(f"Band {band} is not available.")
 
     def process_mask(self, mask_path, index):
         with h5py.File(mask_path, 'r') as f:
