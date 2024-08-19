@@ -7,11 +7,11 @@ from unet import UNet
 from trainer import Trainer
 from evaluator import Evaluator
 
-def train_model(name, data, model, criterion, optimizer, device, epochs):
+def train_model(name, data, model, criterion, optimizer, device, max_epochs, patience, min_delta):
     train_loader = data.train_loader
     val_loader = data.val_loader
-    trainer = Trainer(model, criterion, optimizer, device, train_loader, val_loader)
-    trainer.train(epochs)
+    trainer = Trainer(model, criterion, optimizer, device, train_loader, val_loader, max_epochs, patience, min_delta)
+    trainer.train()
     torch.save(model.state_dict(), name + '.pth' )
 
 def eval_model(name, data, model, device):
@@ -30,8 +30,10 @@ def a(mode):
     if mode == 'train':
         criterion = nn.BCEWithLogitsLoss() 
         optimizer = optim.Adam(model.parameters(), lr=1e-4)
-        epochs = 25
-        train_model(name, data, model, criterion, optimizer, device, epochs)
+        max_epochs = 100
+        patience = 5
+        min_delta = 0.0
+        train_model(name, data, model, criterion, optimizer, device, max_epochs, patience, min_delta)
     elif mode == 'eval':
         eval_model(name, data, model, device)
 
