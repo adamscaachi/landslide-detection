@@ -36,6 +36,7 @@ def a(mode):
         eval_model(name, data, model, device)
 
 if __name__ == "__main__":
+    torch.manual_seed(42)
     parser = argparse.ArgumentParser()
     parser.add_argument('approach', type=str, help='Approach abbreviation: e.g. [a] if using the baseline approach.')
     parser.add_argument('mode', type=str, help='Mode to run the script: [train] or [eval].')
