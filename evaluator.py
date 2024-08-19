@@ -49,7 +49,8 @@ class Evaluator:
         self.recall = self.calculate_recall()
         self.f1 = self.calculate_f1()
         self.iou = self.calculate_iou()
-        self.print_metrics(mode, threshold) if mode else None
+        if mode:
+            self.print_metrics(mode, threshold)
 
     def predict_mask(self, image, threshold):
         with torch.no_grad():
