@@ -1,17 +1,19 @@
 import glob
 import h5py
 import torch
+import random
 import numpy as np
 from sklearn.model_selection import train_test_split
-from torch.utils.data import TensorDataset, DataLoader
+from torch.utils.data import DataLoader, Dataset
 
 class Data:
 
-    def __init__(self, bands):
+    def __init__(self, bands, augment=False):
         self.bands = bands
+        self.augment = augment
         self.read_and_process_data()
         self.split_data()
-        self.train_loader = self.create_loader(self.train_images, self.train_masks)
+        self.train_loader = self.create_loader(self.train_images, self.train_masks, self.augment)
         self.val_loader = self.create_loader(self.val_images, self.val_masks)
         self.test_loader = self.create_loader(self.test_images, self.test_masks)
 
@@ -60,8 +62,38 @@ class Data:
         del temp_images
         del temp_masks
 
-    def create_loader(self, images, masks):
+    def create_loader(self, images, masks, augment=False): 
         images_tensor = torch.tensor(images, dtype=torch.float32)
         masks_tensor = torch.tensor(masks, dtype=torch.float32)
-        dataset_tensor = TensorDataset(images_tensor, masks_tensor)
-        return DataLoader(dataset_tensor, batch_size=64, shuffle=True)
+        dataset = AugmentedDataset(images_tensor, masks_tensor, augment)
+        return DataLoader(dataset, batch_size=64, shuffle=True)
+
+class AugmentedDataset(Dataset):
+
+    def __init__(self, images_tensor, masks_tensor, augment):
+        self.images = images_tensor
+        self.masks = masks_tensor
+        self.augment = augment
+        self.augmentations = [self.flip]
+
+    def __len__(self):
+        return len(self.images)
+
+    def __getitem__(self, idx):
+        image = self.images[idx]
+        mask = self.masks[idx]
+        if self.augment and random.random() > 0.1:
+            image, mask = self.augment_image_and_mask(image, mask)
+        return image, mask
+
+    def augment_image_and_mask(self, image, mask):
+        for function in self.augmentations:
+            if random.random() > 0.5:
+                image, mask = function(image, mask)
+        return image, mask
+
+    def flip(self, image, mask):
+        axis = random.choice([[1], [2], [1, 2]])
+        image = torch.flip(image, axis)
+        mask = torch.flip(mask, axis)
+        return image, mask
