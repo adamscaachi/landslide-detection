@@ -74,7 +74,7 @@ class AugmentedDataset(Dataset):
         self.images = images_tensor
         self.masks = masks_tensor
         self.augment = augment
-        self.augmentations = [self.flip]
+        self.augmentations = [self.flip, self.dropout]
 
     def __len__(self):
         return len(self.images)
@@ -96,4 +96,9 @@ class AugmentedDataset(Dataset):
         axis = random.choice([[1], [2], [1, 2]])
         image = torch.flip(image, axis)
         mask = torch.flip(mask, axis)
+        return image, mask
+
+    def dropout(self, image, mask):
+        dropout_mask = torch.rand_like(image) > 0.001
+        image = image * dropout_mask
         return image, mask
