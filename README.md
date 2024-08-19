@@ -5,21 +5,21 @@ The number of landslide events is expected to increase as a result of climate ch
 ## Data
 All data is provided as part of the LandSlide4Sense 2022 competition [1]. 
 
-6-channel input images are used as the features:
-- Channels 1 to 3 comprise an RGB image acquired from Sentinel-2 satellite data (bands 2 to 4).
-- Channel 4 is an NDVI image also produced using Sentinel-2 satellite data (bands 4 and 8).
-- Channels 5 and 6 consist of a digital elevation model and slope data acquired from ALOS PALSAR.
-  
-A binary mask image that indicates which pixels correspond to landslide locations is used as the label. Each input channel is min-max normalised, then the data is divided into training (832 image), validation (64 image), and test (64 image) splits and a PyTorch DataLoader for each split is created. 
+For each image patch there are 14 provided imagery bands:
+- Multispectral data from Sentinel-2: B1, B2, B3, B4, B5, B6, B7, B8, B9, B10, B11, B12.
+- Slope data from ALOS PALSAR: B13.
+- Digital elevation model (DEM) from ALOS PALSAR: B14.
 
-An example of the input channels and corresponding label is shown below.
+Additional bands can also be made through combinations of the provided bands, these include:
+- Normalised difference vegetation index (NDVI) which is given by $`\frac{\text{B8}-\text{B4}}{\text{B8}+\text{B4}}`$
+- Normalised difference water index (NDWI) which is given by $`\frac{\text{B3}-\text{B8}}{\text{B3}+\text{B8}}`$
   
-![data](https://github.com/user-attachments/assets/09c5daba-cd62-4dbf-af1f-895445c60e9d)
+A binary mask image that indicates which pixels correspond to landslide locations is also provided. The choice of which bands are fed to the model can be passed as an argument to the data class. Each band is min-max normalised, and the data is divided into training (832 image), validation (64 image), and test (64 image) splits.
 
 ## Approaches
 
 ### A) Baseline Approach
-A U-Net model is used with a similar implementation to that of the original paper [2], with the exception that here the 3x3 convolutions are padded. This adjustment reduces the size reduction of the feature maps in the contracting path of the U-Net, which is necessary considering the small size of the input images (128x128) compared to those of the original U-Net implementation (572x572). The model is trained using binary cross entropy as the loss function and Adam as the optimisation algorithm. 
+A U-Net model is used with a similar implementation to that of the original paper [2], with the exception that here the 3x3 convolutions are padded. This adjustment reduces the size reduction of the feature maps in the contracting path of the U-Net, which is necessary considering the small size of the input images (128x128) compared to those of the original U-Net implementation (572x572). The model is trained using binary cross entropy as the loss function and B4, B3, B2, NDVI, B13 and B14 as the imagery bands.
 
 ### B) Baseline Approach with Data Augmentation
 Coming soon.
