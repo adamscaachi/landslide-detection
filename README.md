@@ -19,7 +19,7 @@ A binary mask image that indicates which pixels correspond to landslide location
 ## Approaches
 
 ### A) Baseline Approach
-A U-Net model is used with a similar implementation to that of the original paper [2], with the exception that here the 3x3 convolutions are padded. This adjustment reduces the size reduction of the feature maps in the contracting path of the U-Net, which is necessary considering the small size of the input images (128x128) compared to those of the original U-Net implementation (572x572). The model is trained using binary cross entropy as the loss function and B4, B3, B2, NDVI, B13 and B14 as the imagery bands.
+A U-Net model is used with a similar implementation to that of the original paper [2], with the exception that here the 3x3 convolutions are padded. This adjustment reduces the size reduction of the feature maps in the contracting path of the U-Net, which is necessary considering the small size of the input images (128x128) compared to those of the original U-Net implementation (572x572). The model is trained using binary cross entropy as the loss function and the B4, B3, B2, NDVI, B13 and B14 imagery bands as features.
 
 ### B) Baseline Approach with Data Augmentation
 Coming soon.
