@@ -11,7 +11,7 @@ class AugmentedDataset(Dataset):
         self.images = images_tensor
         self.masks = masks_tensor
         self.augment = augment
-        self.augmentations = [self.flip, self.dropout]
+        self.augmentations = [self.flip, self.dropout, self.contrast, self.brightness]
 
     def __len__(self):
         return len(self.images)
@@ -42,6 +42,15 @@ class AugmentedDataset(Dataset):
         image = image * dropout_mask
         return image, mask
 
+    def contrast(self, image, mask):
+        mean = torch.mean(image, dim=(1, 2), keepdim=True)
+        image = (image - mean) * random.uniform(0.5, 1.5) + mean
+        return torch.clamp(image, 0, 1), mask
+
+    def brightness(self, image, mask):
+        image = image * random.uniform(0.5, 1.5)
+        return torch.clamp(image, 0, 1), mask
+
     def visualise_augmentation(self, function):    
         image, mask = self.images, self.masks
         image_aug, mask_aug = function(image, mask)
@@ -58,4 +67,4 @@ if __name__ == "__main__":
     image_tensor = torch.tensor(image, dtype=torch.float32).permute(2, 0, 1) / 255.0  
     mask_tensor = torch.tensor(mask, dtype=torch.float32).unsqueeze(0)    
     dataset = AugmentedDataset(image_tensor, mask_tensor, augment=True)
-    dataset.visualise_augmentation(dataset.flip)
+    dataset.visualise_augmentation(dataset.brightness)
