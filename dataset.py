@@ -1,5 +1,8 @@
+import cv2
 import torch
 import random
+import matplotlib.pyplot as plt
+from skimage import data
 from torch.utils.data import Dataset
 
 class AugmentedDataset(Dataset):
@@ -21,6 +24,8 @@ class AugmentedDataset(Dataset):
         return image, mask
 
     def augment_image_and_mask(self, image, mask):
+        image = image.clone()
+        mask = mask.clone()
         for function in self.augmentations:
             if random.random() > 0.5:
                 image, mask = function(image, mask)
@@ -36,3 +41,21 @@ class AugmentedDataset(Dataset):
         dropout_mask = torch.rand_like(image) > 0.001
         image = image * dropout_mask
         return image, mask
+
+    def visualise_augmentation(self, function):    
+        image, mask = self.images, self.masks
+        image_aug, mask_aug = function(image, mask)
+        fig, axs = plt.subplots(2, 2, figsize=(4, 4))
+        axs[0, 0].imshow(image.permute(1, 2, 0).cpu().numpy())
+        axs[0, 1].imshow(image_aug.permute(1, 2, 0).cpu().numpy())
+        axs[1, 0].imshow(mask.squeeze().cpu().numpy(), cmap='gray')
+        axs[1, 1].imshow(mask_aug.squeeze().cpu().numpy(), cmap='gray')
+        plt.show()
+
+if __name__ == "__main__":
+    image = cv2.resize(data.cat(), (128, 128))
+    mask = (image[:, :, 0] > 128).astype(float)
+    image_tensor = torch.tensor(image, dtype=torch.float32).permute(2, 0, 1) / 255.0  
+    mask_tensor = torch.tensor(mask, dtype=torch.float32).unsqueeze(0)    
+    dataset = AugmentedDataset(image_tensor, mask_tensor, augment=True)
+    dataset.visualise_augmentation(dataset.flip)
