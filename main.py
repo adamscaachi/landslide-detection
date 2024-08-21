@@ -6,6 +6,7 @@ from data import Data
 from unet import UNet
 from trainer import Trainer
 from evaluator import Evaluator
+from lovasz_losses import lovasz_hinge
 
 def train_model(name, data, model, criterion, optimizer, device, max_epochs, patience, min_delta):
     train_loader = data.train_loader
@@ -54,12 +55,29 @@ def b(mode):
     elif mode == 'eval':
         eval_model(name, data, model, device)
 
+# Lovasz Loss
+def c(mode):
+    name = 'c'
+    bands = ["B4", "B3", "B2", "NDVI", "B13", "B14"]  
+    data = Data(bands)
+    model = UNet(in_channels=len(bands), out_channels=1)  
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    if mode == 'train':
+        criterion = lovasz_hinge 
+        optimizer = optim.Adam(model.parameters(), lr=1e-4)
+        max_epochs = 100
+        patience = 5
+        min_delta = 0.0
+        train_model(name, data, model, criterion, optimizer, device, max_epochs, patience, min_delta)
+    elif mode == 'eval':
+        eval_model(name, data, model, device)
+
 if __name__ == "__main__":
     torch.manual_seed(42)
     parser = argparse.ArgumentParser()
     parser.add_argument('approach', type=str, help='Approach abbreviation: e.g. [a] if using the baseline approach.')
     parser.add_argument('mode', type=str, help='Mode to run the script: [train] or [eval].')
     args = parser.parse_args()
-    approaches = {"a": a, "b": b}
+    approaches = {"a": a, "b": b, "c": c}
     approach = approaches.get(args.approach)
     approach(args.mode)
