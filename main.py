@@ -33,7 +33,7 @@ def a(mode):
         criterion = nn.BCEWithLogitsLoss() 
         optimizer = optim.Adam(model.parameters(), lr=1e-4)
         max_epochs = 100
-        patience = 5
+        patience = 10
         min_delta = 0.0
         train_model(name, data, model, criterion, optimizer, device, max_epochs, patience, min_delta)
     elif mode == 'eval':
@@ -50,7 +50,7 @@ def b(mode):
         criterion = nn.BCEWithLogitsLoss() 
         optimizer = optim.Adam(model.parameters(), lr=1e-4)
         max_epochs = 100
-        patience = 5
+        patience = 10
         min_delta = 0.0
         train_model(name, data, model, criterion, optimizer, device, max_epochs, patience, min_delta)
     elif mode == 'eval':
@@ -67,7 +67,7 @@ def c(mode):
         criterion = lovasz_hinge 
         optimizer = optim.Adam(model.parameters(), lr=1e-4)
         max_epochs = 100
-        patience = 5
+        patience = 10
         min_delta = 0.0
         train_model(name, data, model, criterion, optimizer, device, max_epochs, patience, min_delta)
     elif mode == 'eval':
