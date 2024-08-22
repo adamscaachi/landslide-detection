@@ -1,3 +1,4 @@
+import random
 import argparse
 import torch
 import torch.nn as nn
@@ -74,6 +75,7 @@ def c(mode):
 
 if __name__ == "__main__":
     torch.manual_seed(42)
+    random.seed(42)
     parser = argparse.ArgumentParser()
     parser.add_argument('approach', type=str, help='Approach abbreviation: e.g. [a] if using the baseline approach.')
     parser.add_argument('mode', type=str, help='Mode to run the script: [train] or [eval].')
