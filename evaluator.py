@@ -23,10 +23,10 @@ class Evaluator:
     def print_metrics(self, mode, threshold):
         print (f"\n{mode}\n"
                f"Model: {self.state_dict}" f" (threshold = {threshold:.2f})\n"
-               f"Precision = {self.precision:.2f}\n"
-               f"Recall = {self.recall:.2f}\n"
-               f"F1 Score = {self.f1:.2f}\n"
-               f"IoU = {self.iou:.2f}")
+               f"Precision = {self.precision:.4f}\n"
+               f"Recall = {self.recall:.4f}\n"
+               f"F1 Score = {self.f1:.4f}\n"
+               f"IoU = {self.iou:.4f}")
 
     def initialise_confusion_matrix(self):
         self.TP_total = 0
