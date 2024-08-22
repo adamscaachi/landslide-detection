@@ -2,6 +2,7 @@ import cv2
 import torch
 import random
 import matplotlib.pyplot as plt
+import torchvision.transforms.functional as F
 from skimage import data
 from torch.utils.data import Dataset
 
@@ -11,7 +12,7 @@ class AugmentedDataset(Dataset):
         self.images = images_tensor
         self.masks = masks_tensor
         self.augment = augment
-        self.augmentations = [self.flip, self.dropout, self.contrast, self.brightness]
+        self.augmentations = [self.flip, self.dropout, self.contrast, self.brightness, self.rotate]
 
     def __len__(self):
         return len(self.images)
@@ -51,6 +52,12 @@ class AugmentedDataset(Dataset):
         image = image * random.uniform(0.5, 1.5)
         return torch.clamp(image, 0, 1), mask
 
+    def rotate(self, image, mask):
+        angle = random.choice([90, 180, 270])
+        image = F.rotate(image, angle)
+        mask = F.rotate(mask, angle)
+        return image, mask
+
     def visualise_augmentation(self, function):    
         image, mask = self.images, self.masks
         image_aug, mask_aug = function(image, mask)
@@ -67,4 +74,4 @@ if __name__ == "__main__":
     image_tensor = torch.tensor(image, dtype=torch.float32).permute(2, 0, 1) / 255.0  
     mask_tensor = torch.tensor(mask, dtype=torch.float32).unsqueeze(0)    
     dataset = AugmentedDataset(image_tensor, mask_tensor, augment=True)
-    dataset.visualise_augmentation(dataset.brightness)
+    dataset.visualise_augmentation(dataset.rotate)
