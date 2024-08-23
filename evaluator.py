@@ -1,5 +1,6 @@
 import torch
 import numpy as np
+import matplotlib.pyplot as plt
 
 class Evaluator:
 
@@ -19,6 +20,7 @@ class Evaluator:
         self.find_optimal_threshold()
         self.evaluate(val_loader, "Validation", self.optimal_threshold)
         self.evaluate(test_loader, "Testing", self.optimal_threshold)
+        self.visualise_predictions()
 
     def print_metrics(self, mode, threshold):
         print (f"\n{mode}\n"
@@ -85,3 +87,26 @@ class Evaluator:
             if self.iou > self.best_iou:
                 self.best_iou = self.iou
                 self.optimal_threshold = threshold
+
+    def visualise_predictions(self):
+        images, masks = next(iter(self.test_loader))
+        indices = [29, 32, 59]
+        fig, axs = plt.subplots(3, 3, figsize=(6, 6))
+        for i, idx in enumerate(indices):
+            image = images[idx].to(self.device)
+            mask = masks[idx].to(self.device)
+            prediction = self.predict_mask(image.unsqueeze(0), self.optimal_threshold)
+            image = image[:3].permute(1, 2, 0).cpu().numpy()
+            mask = mask.squeeze().cpu().numpy()
+            prediction = prediction.squeeze()
+            axs[i, 0].imshow(image)
+            axs[0, 0].set_title("Input (RGB)")
+            axs[i, 0].axis('off')
+            axs[i, 1].imshow(prediction, cmap='gray')
+            axs[0, 1].set_title("Prediction")
+            axs[i, 1].axis('off')
+            axs[i, 2].imshow(mask, cmap='gray')
+            axs[0, 2].set_title("Target")
+            axs[i, 2].axis('off')
+        plt.subplots_adjust(wspace=0.05, hspace=0.05)
+        plt.savefig('predictions.png', bbox_inches='tight', dpi=300)
