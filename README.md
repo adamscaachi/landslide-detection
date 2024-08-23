@@ -44,3 +44,12 @@ The model is trained using binary cross entropy as the loss function and the B2,
   </tr>
 </table>
 </div>
+
+## Demonstration
+
+A demonstration of the model on a sample of images from the test dataset is shown below.
+
+<div align="center">
+    <img src="https://github.com/user-attachments/assets/8ee82d9a-bd24-4931-8e34-2478b64144f9" alt="predictions" width="400"/>
+</div>
+
